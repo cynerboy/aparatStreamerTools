@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>player</title>
+</head>
+<body>
+  <!-- video -->
+  <video id="video-player" style="position:absolute;" width="100%" hidden muted loop>
+    <source id="video-source" src="video.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <div style="position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%); text-align: center !important;">
+    <h1 style="text-decoration: center !important; font-weight: bolder; color:white; font-size: 50px;" dir="rtl" id="usernameEvent"></h1><br>
+    <h1 style="text-decoration: center !important; font-weight: bolder; color:white; font-size: 50px;" dir="rtl" id="numberOfDiamonds"></h1>
+  </div>
+  <!-- audio -->
+  <audio id="music" src="audio.mp3"></audio>
+</body>
+<script>
+  let inputVideoFollow = "follow.mp4";
+  let inputAudioFollow = "follow.mp3";
+  let inputVideoRuby = "ruby.mp4";
+  let inputAudioRuby = "ruby.mp3";
+  let audioTimeFollowDuration = 40; //Second
+  let audioTimeRubyDuration = 16; //Second
+  let vid = document.getElementById("video-player");
+  let videoSource = document.getElementById("video-source");
+  let audio = document.getElementById("music"); 
+  let lockState = false;
+
+  function deleteRequest(){
+      // Specify the URL of your text file
+      var fileUrl = 'http://localhost:8000/deleteJson';
+
+      // Create a new XMLHttpRequest object
+      var xhr = new XMLHttpRequest();
+
+      // Set up a callback function to handle the response
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          lockState = false;
+        } else {
+          console.error('Failed to load the file:', xhr.statusText);
+        }
+      };
+      // Open the request
+      xhr.open('GET', fileUrl);
+
+      // Send the request
+      xhr.send();
+  }
+
+  function playGif() {
+    vid.play();
+    audio.play(); 
+    vid.hidden = false;
+  } 
+
+  function pauseGif() { 
+    vid.pause();
+    audio.pause();
+    vid.hidden = true;
+    document.getElementById('usernameEvent').innerHTML = "";
+    document.getElementById('numberOfDiamonds').innerHTML = "";
+    deleteRequest();
+  }
+
+  function checkTheJsonFile(){
+    if(lockState == false){
+      fetch('http://localhost:8000/data.json?' + new Date().getTime())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('khataye darkhast');
+        }
+        return response.json();
+      })
+      .then(data => {
+          lockState = true;
+          
+          if(data['role'] == 'follower'){
+            document.getElementById('usernameEvent').innerHTML = " دوست عزیز " + data['username'] + " ممنونم بابت دنبال";
+            vid.canPlayType("video/mp4");
+            videoSource.src = inputVideoFollow;
+            vid.load();
+            audio.src = inputAudioFollow;
+            playGif();
+            setTimeout(function() {pauseGif();}, audioTimeFollowDuration * 1000);
+          }else{
+            document.getElementById('usernameEvent').innerHTML = " دوست عزیز " + data['username'] + " ممنونم بابت روبی";
+            document.getElementById('numberOfDiamonds').innerHTML = " تعداد " + data['ruby'] + " اهدا شد";
+            vid.canPlayType("video/mp4");
+            videoSource.src = inputVideoRuby;
+            vid.load();
+            audio.src = inputAudioRuby;
+            playGif();
+            setTimeout(function() {pauseGif();}, audioTimeRubyDuration * 1000);
+          }
+          
+          //console.log('dadeha injast: ', data);
+      })
+      .catch(error => {
+        console.error('Json data not found: ', error);
+      });
+    }
+  }
+
+  var xTime = 0;
+    
+  function foreverCustomLoop(){
+    while (xTime == 0) {
+      xTime=1;
+      setTimeout(function() {checkTheJsonFile();xTime=0;foreverCustomLoop();}, 5 * 1000);
+    } 
+  }
+
+  foreverCustomLoop();
+
+</script>
+</html>
