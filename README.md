@@ -50,4 +50,4 @@
 
 ## دیاگرام برنامه
 
-![diagram](https://i.postimg.cc/85fRHFBG/x.png)
+![diagram](https://i.postimg.cc/W3rDzxPm/x2.png)
