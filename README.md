@@ -48,3 +48,6 @@
 
 >python scanner.py
 
+## دیاگرام برنامه
+
+![diagram](https://i.postimg.cc/85fRHFBG/x.png)
